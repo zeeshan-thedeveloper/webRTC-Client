@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import "../styles/joincall.css";
 
-const JoinCall = () => {
+const JoinCall = ({webRtcClient,...props}) => {
   const [name, setName] = useState("");
   const [meetingId, setMeetingId] = useState("");
 
@@ -36,7 +36,9 @@ const JoinCall = () => {
         <button type="submit">Join</button>
       </form>
       <p>
-        Want to start a new call? <Link to="/start-call">Start a call</Link>
+        Want to start a new call? <button onClick={()=>{
+              props.handelScreenSwitch("startcall")
+        }}>Start a call</button>
       </p>
     </div>
   );

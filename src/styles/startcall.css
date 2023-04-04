@@ -38,4 +38,12 @@
   .StartCall button[type="submit"]:hover {
     background-color: #0069d9;
   }
+
+  .callId{
+    padding-bottom: 2%;
+    margin-left: 2%;
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-top: 2%;
+  }
   

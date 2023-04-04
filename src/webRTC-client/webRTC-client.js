@@ -1,10 +1,9 @@
 import signalServer from "./signal-server";
 
 const webRTCClient = () => {
-  const localVideo = document.getElementById("localVideo");
-  const remoteVideo = document.getElementById("remoteVideo");
   let signalSocket = null;
   let localStream = null;
+  let remoteStream = null;
   let peerConnection = null;
   let socket = null;
   const init = (signalServerUrl) => {
@@ -15,15 +14,14 @@ const webRTCClient = () => {
     return signalSocket;
   };
 
-  const startCall = async (userName, callId) => {
+  const startCall = async (userName, callId, socketId) => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: true,
         video: true,
       });
+
       localStream = stream;
-      //localVideo.srcObject = localStream;
-      //remoteVideo.autoplay = true;
 
       peerConnection = new RTCPeerConnection();
 
@@ -32,18 +30,16 @@ const webRTCClient = () => {
       });
 
       peerConnection.ontrack = (event) => {
-        console.log("Remote stream recieved : ",event.streams)
-        //remoteVideo.srcObject = event.streams[0];
+        console.log("Remote stream received : ", event.streams);
+        remoteStream = event.streams[0];
       };
 
       const offer = await peerConnection.createOffer();
       await peerConnection.setLocalDescription(offer);
-      // TODO: Send offer to remote peer
-      // ...
 
       return new Promise((resolve, reject) => {
         signalSocket
-          .initiateCall(userName, callId, offer)
+          .initiateCall(userName, callId, offer, socketId)
           .then((callStatus) => {
             console.log("Call initiated successfully:", callStatus);
             resolve(callStatus);
@@ -59,36 +55,42 @@ const webRTCClient = () => {
     }
   };
 
-  const joinCall = async (offer) => {
+  const joinCall = async (offer, socketId, callId, userName) => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: true,
         video: true,
       });
+
       localStream = stream;
-      localVideo.srcObject = localStream;
-      remoteVideo.autoplay = true;
-
-      // TODO: Implement WebRTC signaling
-      // ...
-
       peerConnection = new RTCPeerConnection();
       localStream.getTracks().forEach((track) => {
         peerConnection.addTrack(track, localStream);
       });
-      peerConnection.ontrack = (event) => {
-        remoteVideo.srcObject = event.streams[0];
-      };
 
-      await peerConnection.setRemoteDescription(offer);
+      peerConnection.ontrack = (event) => {
+        remoteStream = event.streams[0];
+      };
+      const remoteOffer = new RTCSessionDescription(offer);
+      await peerConnection.setRemoteDescription(remoteOffer);
 
       const answer = await peerConnection.createAnswer();
       await peerConnection.setLocalDescription(answer);
 
-      //getting call id :
+      // Wrap the joinCall request with a Promise
+      const joinRequestPromise = new Promise((resolve, reject) => {
+        signalServer
+          .joinCall(userName, callId, socketId, answer)
+          .then((requestResponse) => {
+            resolve(requestResponse);
+          })
+          .catch((error) => {
+            reject(error);
+          });
+      });
 
-      // TODO: Send answer to remote peer
-      // ...
+      // Return the joinRequestPromise
+      return joinRequestPromise;
     } catch (error) {
       console.error("Error joining call:", error);
     }
@@ -103,13 +105,20 @@ const webRTCClient = () => {
     peerConnection = null;
   };
 
+  const getLocalStream = () => {
+    return localStream;
+  };
+
+  const getRemoteStream = () => {
+    return remoteStream;
+  };
   return {
     init,
     startCall,
     joinCall,
     stopCall,
-    localVideo,
-    remoteVideo,
+    getLocalStream,
+    getRemoteStream,
   };
 };
 

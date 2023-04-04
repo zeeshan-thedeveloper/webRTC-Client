@@ -2,13 +2,35 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import "../styles/joincall.css";
 
-const JoinCall = ({webRtcClient,...props}) => {
+const JoinCall = ({
+  callId,
+  callStatus,
+  userName,
+  webRtcClient,
+  signalSocket,
+  setCallId,
+  setCallStatus,
+  setUserName,
+  ...props
+}) => {
   const [name, setName] = useState("");
-  const [meetingId, setMeetingId] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(`Joining with name: ${name} and meetingId: ${meetingId}`);
+    console.log(`Joining with name: ${name} and meetingId: ${callId}`);
+    signalSocket
+      .createJoinRequest(name, callId, signalSocket.getSocketId())
+      .then((requestResponse) => {
+        console.log(requestResponse)
+        if(requestResponse.success){
+          setCallStatus(requestResponse.message)
+          props.handelScreenSwitch("candidatescreen")
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+
   };
 
   return (
@@ -29,16 +51,21 @@ const JoinCall = ({webRtcClient,...props}) => {
           <input
             type="text"
             id="meetingId"
-            value={meetingId}
-            onChange={(e) => setMeetingId(e.target.value)}
+            value={callId}
+            onChange={(e) => setCallId(e.target.value)}
           />
         </div>
         <button type="submit">Join</button>
       </form>
       <p>
-        Want to start a new call? <button onClick={()=>{
-              props.handelScreenSwitch("startcall")
-        }}>Start a call</button>
+        Want to start a new call?{" "}
+        <button
+          onClick={() => {
+            props.handelScreenSwitch("startcall");
+          }}
+        >
+          Start a call
+        </button>
       </p>
     </div>
   );

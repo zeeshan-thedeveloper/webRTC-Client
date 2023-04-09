@@ -22,28 +22,38 @@ const CandidateScreen = ({
   useEffect(() => {
     const remoteVideo = remoteVideoRef.current;
     const localVideo = localVideoRef.current;
-
+    
     if (remoteVideo && localVideo) {
       remoteVideo.srcObject = webRtcClient.getRemoteStream();
       localVideo.srcObject = webRtcClient.getLocalStream();
+      console.log("localstream",webRtcClient.getLocalStream())
     }
-
+    let lastUserId=0;
     signalSocket.getSocket().on("requestStatus", (data) => {
-      console.log("message from server : ", data.remoteOffer);
-      if(data.isAccepted){
-        //now let's join it
-        console.log("joining call")
-        webRtcClient.joinCall(userName,callId,signalSocket.getSocketId(),data.remoteOffer).then((requestResponse)=>{
-          console.log(requestResponse)
-        }).catch((error)=>{
-          console.error(error)
-        })
-      }else{
-        alert("Rejected")
-      } 
+      console.log("message from server : ", data.remoteOffer+" count "+lastUserId);
+      lastUserId++; 
+      setTimeout(() => {
+        if(data.isAccepted){
+          //now let's join it
+          console.log("joining call with userName"+userName)
+          webRtcClient.joinCall(JSON.parse(data.remoteOffer),signalSocket.getSocketId(),callId,userName).then((requestResponse)=>{
+           
+              console.log(requestResponse)
+              remoteVideo.srcObject = webRtcClient.getRemoteStream();
+              console.log("remoteStream-fetched",webRtcClient.getRemoteStream())
+              console.log("webRtcClient.getRemoteStream().getVideoTracks()",webRtcClient.getRemoteStream().getVideoTracks())
+              console.log("getPeerConnection",webRtcClient.getPeerConnection().iceConnectionState)
+            }).catch((error)=>{
+            console.error(error)
+          })
+        }else{
+          alert("Rejected")
+        }   
+      }, 3000);
+      
     });
 
-  }, [webRtcClient, signalSocket]);
+  }, [webRtcClient,signalSocket]);
 
   return (
     <div className="Dashboard">
@@ -67,7 +77,6 @@ const CandidateScreen = ({
           id="localVideo"
           className="local-video"
           autoPlay
-          muted
         ></video>
       </div>
       <div className="controls">

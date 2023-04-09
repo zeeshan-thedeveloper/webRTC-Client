@@ -28,7 +28,7 @@ const signalServer = () => {
 
   const initiateCall = (userName, callId, offer,socketId) => {
     return new Promise((resolve, reject) => {
-      const payload = { userName, callId, offer,socketId };
+      const payload = { userName, callId, offer : JSON.stringify(offer),socketId };
       socket.emit("initiate-call", payload, (callStatus) => {
         if (callStatus.success) {
           resolve(callStatus);
@@ -41,6 +41,7 @@ const signalServer = () => {
 
   const joinCall = (userName, callId, socketId, joinOffer) => {
     return new Promise((resolve, reject) => {
+      // userName, callId, joinOffer,socketId
       const payload = { userName, callId, joinOffer,socketId };
       socket.emit("joinCall", payload, (joinStatus) => {
         if (joinStatus.success) {
@@ -51,9 +52,11 @@ const signalServer = () => {
       });
     });
   };
+
   const createJoinRequest = (userName, callId, socketId) => {
     return new Promise((resolve, reject) => {
       const payload = { userName, callId ,socketId };
+      console.log("calling makeJoinRequest")
       socket.emit("makeJoinRequest", payload, (joinStatus) => {
         if (joinStatus.success) {
           resolve(joinStatus);

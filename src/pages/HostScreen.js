@@ -19,33 +19,55 @@ const HostScreen = ({
   const localVideoRef = useRef(null);
   const [isLoading, setIsLoading] = useState(true);
   const [incomingCall, setIncomingCall] = useState(null);
-  const [remoteUser,setRemoteUser]=useState(null);
+  const [remoteUser, setRemoteUser] = useState(null);
   useEffect(() => {
     const remoteVideo = remoteVideoRef.current;
     const localVideo = localVideoRef.current;
-
+    let lastUserId = 0;
     if (remoteVideo && localVideo) {
       remoteVideo.srcObject = webRtcClient.getRemoteStream();
+      // remoteVideo.srcObject =  webRtcClient.getLocalStream();
       localVideo.srcObject = webRtcClient.getLocalStream();
+      console.log("localstream:",webRtcClient.getLocalStream())
     }
+    let processedIds = [];
 
-    signalSocket.getSocket().on("joinRequest", (data) => {
-      console.log("got new join request : ", data);
-      setIncomingCall(data);
+    signalSocket.getSocket().on("joinRequest", (request) => {
+      if (!processedIds.includes(request.id)) {
+        processedIds.push(request.id);
+        console.log("got new join request : ", request);
+        setIncomingCall(request);
+      } else {
+        console.log("duplicate join request ignored: ", request);
+      }
     });
-    signalSocket.getSocket().on("userToAddInCall", (user) => {
-      console.log("adding new user in call : ", user);
-      setRemoteUser(user)
+
+    signalSocket.getSocket().on("userToAddInCall", async (user) => {
+      if (user.id != lastUserId) {
+        console.log("adding new user in call : ", user);
+        await webRtcClient.addUserInCall(
+          user.userName,
+          user.socketId,
+          user.remoteOffer
+        );
+        setRemoteUser(user);
+        lastUserId = user.id;
+        remoteVideo.srcObject = webRtcClient.getRemoteStream();
+        console.log("remoteStream-fetched",webRtcClient.getRemoteStream())
+        console.log("webRtcClient.getRemoteStream().getVideoTracks()",webRtcClient.getRemoteStream().getVideoTracks())
+        console.log("getPeerConnection",webRtcClient.getPeerConnection().iceConnectionState)
+         
+      }
+
     });
-    
-  }, [webRtcClient, signalSocket]);
+  }, [webRtcClient,signalSocket]);
 
   const answerCall = (socketId) => {
     signalSocket
       .sendAcceptJoinRequest(callId.callId, socketId)
       .then((requestResponse) => {
-        console.log(requestResponse)
-        setIncomingCall(null)
+        console.log(requestResponse);
+        setIncomingCall(null);
       })
       .catch((error) => {});
   };

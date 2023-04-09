@@ -13,17 +13,17 @@ const JoinCall = ({
   setUserName,
   ...props
 }) => {
-  const [name, setName] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(`Joining with name: ${name} and meetingId: ${callId}`);
-    signalSocket
-      .createJoinRequest(name, callId, signalSocket.getSocketId())
-      .then((requestResponse) => {
+    console.log(`Joining with name: ${userName} and meetingId: ${callId}`);
+    webRtcClient
+      .createJoinRequest(userName, callId, signalSocket.getSocketId())
+      .then(async(requestResponse) => {
         console.log(requestResponse)
         if(requestResponse.success){
           setCallStatus(requestResponse.message)
+          await webRtcClient.openLocalCameraAndStream();
           props.handelScreenSwitch("candidatescreen")
         }
       })
@@ -42,8 +42,8 @@ const JoinCall = ({
           <input
             type="text"
             id="name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+            value={userName}
+            onChange={(e) => setUserName(e.target.value)}
           />
         </div>
         <div>

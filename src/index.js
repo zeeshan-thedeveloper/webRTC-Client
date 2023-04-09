@@ -6,7 +6,7 @@ import reportWebVitals from './reportWebVitals';
 import webRTCClient from "./webRTC-client/webRTC-client";
 
 const webRtcClient = webRTCClient();
-let signalSocket = webRtcClient.init("http://192.168.8.103:8080");
+let signalSocket = webRtcClient.init("http://192.168.8.101:8080");
 console.log("signalSocket",signalSocket)
 
 const root = ReactDOM.createRoot(document.getElementById('root'));

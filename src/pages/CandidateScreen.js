@@ -20,40 +20,52 @@ const CandidateScreen = ({
   const [incomingCall, setIncomingCall] = useState(null);
 
   useEffect(() => {
+    const localVideo = localVideoRef.current;
+
+    if (isVideoOn) {
+      webRtcClient.resumeSharingVideo(localVideo);
+    } else {
+      webRtcClient.stopSharingVideo(localVideo);
+    }
+
+    if (isMicOn) {
+      webRtcClient.resumeSharingAudio(localVideo);
+    } else {
+      webRtcClient.stopSharingAudio(localVideo);
+    }
+  }, [isMicOn, isVideoOn]);
+
+  useEffect(() => {
     const remoteVideo = remoteVideoRef.current;
     const localVideo = localVideoRef.current;
-    
+
     if (remoteVideo && localVideo) {
       remoteVideo.srcObject = webRtcClient.getRemoteStream();
       localVideo.srcObject = webRtcClient.getLocalStream();
-      console.log("localstream",webRtcClient.getLocalStream())
+      console.log("localstream", webRtcClient.getLocalStream());
     }
-    let lastUserId=0;
+    let lastUserId = 0;
     signalSocket.getSocket().on("requestStatus", (data) => {
-      console.log("message from server : ", data.remoteOffer+" count "+lastUserId);
-      lastUserId++; 
-      setTimeout(() => {
-        if(data.isAccepted){
-          //now let's join it
-          console.log("joining call with userName"+userName)
-          webRtcClient.joinCall(JSON.parse(data.remoteOffer),signalSocket.getSocketId(),callId,userName).then((requestResponse)=>{
-           
-              console.log(requestResponse)
-              remoteVideo.srcObject = webRtcClient.getRemoteStream();
-              console.log("remoteStream-fetched",webRtcClient.getRemoteStream())
-              console.log("webRtcClient.getRemoteStream().getVideoTracks()",webRtcClient.getRemoteStream().getVideoTracks())
-              console.log("getPeerConnection",webRtcClient.getPeerConnection().iceConnectionState)
-            }).catch((error)=>{
-            console.error(error)
-          })
-        }else{
-          alert("Rejected")
-        }   
-      }, 3000);
-      
+      console.log(
+        "message from server : ",
+        data.remoteOffer + " count " + lastUserId
+      );
+      webRtcClient
+        .joinCall(
+          JSON.parse(data.remoteOffer),
+          signalSocket.getSocketId(),
+          callId,
+          userName
+        )
+        .then((requestResponse) => {
+          console.log(requestResponse);
+          remoteVideo.srcObject = webRtcClient.getRemoteStream();
+        })
+        .catch((error) => {
+          console.error(error);
+        });
     });
-
-  }, [webRtcClient,signalSocket]);
+  }, [webRtcClient, signalSocket]);
 
   return (
     <div className="Dashboard">

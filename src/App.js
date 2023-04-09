@@ -4,7 +4,6 @@ import JoinCall from "./pages/JoinCall";
 import HostScreen from "./pages/HostScreen";
 import Authenticator from "./pages/Authenticator";
 import StartCall from "./pages/StartCall";
-import webRTCClient from "./webRTC-client/webRTC-client";
 import { useEffect, useState } from "react";
 import CandidateScreen from "./pages/CandidateScreen";
 
@@ -18,6 +17,7 @@ function App({ webRtcClient, signalSocket }) {
   const [isStartCallScreenOpen, setIsStartCallScreenOpen] = useState(true);
   const [isHostScreenOpen, setIsHostScreenOpen] = useState(false);
   const [isCandidateScreenOpen, setIsCandidateScreenOpen] = useState(false);
+  
   const handelScreenSwitch = (screenName) => {
     switch (screenName) {
       case "joincall":

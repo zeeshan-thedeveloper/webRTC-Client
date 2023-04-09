@@ -18,17 +18,22 @@ const signalServer = () => {
 
     // TODO:we need to replace socket id with device id mechanism
 
-    socket.on("socketId",(id)=>{
-      socketId=id
-      console.log("Storing socket id : "+id)
-    })
+    socket.on("socketId", (id) => {
+      socketId = id;
+      console.log("Storing socket id : " + id);
+    });
 
     return socket;
   };
 
-  const initiateCall = (userName, callId, offer,socketId) => {
+  const initiateCall = (userName, callId, offer, socketId) => {
     return new Promise((resolve, reject) => {
-      const payload = { userName, callId, offer : JSON.stringify(offer),socketId };
+      const payload = {
+        userName,
+        callId,
+        offer: JSON.stringify(offer),
+        socketId,
+      };
       socket.emit("initiate-call", payload, (callStatus) => {
         if (callStatus.success) {
           resolve(callStatus);
@@ -39,10 +44,9 @@ const signalServer = () => {
     });
   };
 
-  const joinCall = (userName, callId, socketId, joinOffer) => {
+  const joinCall = (userName, callId, socketId, joinOffer,localIceCandidates) => {
     return new Promise((resolve, reject) => {
-      // userName, callId, joinOffer,socketId
-      const payload = { userName, callId, joinOffer,socketId };
+      const payload = { userName, callId, joinOffer, socketId,localIceCandidates };
       socket.emit("joinCall", payload, (joinStatus) => {
         if (joinStatus.success) {
           resolve(joinStatus);
@@ -55,8 +59,8 @@ const signalServer = () => {
 
   const createJoinRequest = (userName, callId, socketId) => {
     return new Promise((resolve, reject) => {
-      const payload = { userName, callId ,socketId };
-      console.log("calling makeJoinRequest")
+      const payload = { userName, callId, socketId };
+      console.log("creating join request");
       socket.emit("makeJoinRequest", payload, (joinStatus) => {
         if (joinStatus.success) {
           resolve(joinStatus);
@@ -66,10 +70,10 @@ const signalServer = () => {
       });
     });
   };
-  
-  const sendAcceptJoinRequest=(callId,socketId)=>{
+
+  const sendAcceptJoinRequest = (callId, socketId) => {
     return new Promise((resolve, reject) => {
-      const payload = { callId ,socketId };
+      const payload = { callId, socketId };
       socket.emit("sendAcceptJoinRequest", payload, (joinStatus) => {
         if (joinStatus.success) {
           resolve(joinStatus);
@@ -78,7 +82,20 @@ const signalServer = () => {
         }
       });
     });
-  }
+  };
+
+  const sendNewIceCandidate = (socketId, iceCandidates) => {
+    return new Promise((resolve, reject) => {
+      const payload = { socketId, iceCandidates };
+      socket.emit("save-icecandidate", payload, (response) => {
+        if (response.success) {
+          resolve(response);
+        } else {
+          reject(new Error(response.message));
+        }
+      });
+    });
+  };
 
   const getCallId = (userName) => {
     return new Promise((resolve, reject) => {
@@ -91,14 +108,24 @@ const signalServer = () => {
       });
     });
   };
-  
-  const getSocketId=()=>{
+
+  const getSocketId = () => {
     return socketId;
-  }
-  const getSocket=()=>{
+  };
+  const getSocket = () => {
     return socket;
-  }
-  return { init, initiateCall, joinCall, getCallId,getSocketId,getSocket,createJoinRequest,sendAcceptJoinRequest};
+  };
+  return {
+    init,
+    initiateCall,
+    joinCall,
+    getCallId,
+    getSocketId,
+    getSocket,
+    createJoinRequest,
+    sendAcceptJoinRequest,
+    sendNewIceCandidate,
+  };
 };
 
 export default signalServer;

@@ -23,7 +23,6 @@ const JoinCall = ({
         console.log(requestResponse)
         if(requestResponse.success){
           setCallStatus(requestResponse.message)
-          await webRtcClient.openLocalCameraAndStream();
           props.handelScreenSwitch("candidatescreen")
         }
       })
@@ -32,7 +31,7 @@ const JoinCall = ({
       });
 
   };
-
+  
   return (
     <div className="Join">
       <h2>Join the call</h2>

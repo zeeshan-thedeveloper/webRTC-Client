@@ -20,15 +20,31 @@ const HostScreen = ({
   const [isLoading, setIsLoading] = useState(true);
   const [incomingCall, setIncomingCall] = useState(null);
   const [remoteUser, setRemoteUser] = useState(null);
+
+  useEffect(() => {
+    const localVideo = localVideoRef.current;
+ 
+    if (isVideoOn) {
+      webRtcClient.resumeSharingVideo(localVideo);
+    } else {
+      webRtcClient.stopSharingVideo(localVideo);
+    }
+
+    if (isMicOn) {
+      webRtcClient.resumeSharingAudio(localVideo);
+    } else {
+      webRtcClient.stopSharingAudio(localVideo);
+    }
+  }, [isMicOn, isVideoOn]);
+
   useEffect(() => {
     const remoteVideo = remoteVideoRef.current;
     const localVideo = localVideoRef.current;
     let lastUserId = 0;
     if (remoteVideo && localVideo) {
       remoteVideo.srcObject = webRtcClient.getRemoteStream();
-      // remoteVideo.srcObject =  webRtcClient.getLocalStream();
       localVideo.srcObject = webRtcClient.getLocalStream();
-      console.log("localstream:",webRtcClient.getLocalStream())
+      console.log("localstream:", webRtcClient.getLocalStream());
     }
     let processedIds = [];
 
@@ -48,19 +64,15 @@ const HostScreen = ({
         await webRtcClient.addUserInCall(
           user.userName,
           user.socketId,
-          user.remoteOffer
+          user.remoteOffer,
+          user.remoteICECandidates
         );
         setRemoteUser(user);
         lastUserId = user.id;
         remoteVideo.srcObject = webRtcClient.getRemoteStream();
-        console.log("remoteStream-fetched",webRtcClient.getRemoteStream())
-        console.log("webRtcClient.getRemoteStream().getVideoTracks()",webRtcClient.getRemoteStream().getVideoTracks())
-        console.log("getPeerConnection",webRtcClient.getPeerConnection().iceConnectionState)
-         
       }
-
     });
-  }, [webRtcClient,signalSocket]);
+  }, [webRtcClient, signalSocket]);
 
   const answerCall = (socketId) => {
     signalSocket

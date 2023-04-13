@@ -1,0 +1,31 @@
+.container{
+    background-color: beige;
+}
+
+.pageTitle{
+    text-align: center;
+}
+
+.inlineHeading{
+    display: inline-block;
+}
+
+.createCallContainer{
+    margin-left: 5%;
+}
+
+.inlineInput {
+    display: inline-block;
+}
+
+.inlineLabel{
+    display: inline-block;
+    margin-left: 10px;
+    margin-right: 5px;
+}  
+
+.inlineButton{
+    display: inline-block;
+    margin-left: 10px;
+    margin-right: 5px;
+}

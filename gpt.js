@@ -10,7 +10,7 @@ Initialize WebRTC peer connections: Both the caller (who creates the offer) and 
 javascript
 Copy code
 const configuration = { "iceServers": [{ "urls": "stun:stun.l.google.com:19302" }] };
-const peerConnection = new RTCPeerConnection(configuration);
+const peerConnection = new  (configuration);
 Add local media stream: Capture local media (audio/video) using getUserMedia and add it to the peer connection.
 javascript
 Copy code
@@ -29,6 +29,7 @@ peerConnection.addEventListener('icecandidate', (event) => {
     signalingServer.send(JSON.stringify({ type: 'new-ice-candidate', candidate: event.candidate }));
   }
 });
+
 On the remote peer side, listen for incoming ICE candidates and add them to the peer connection.
 
 javascript

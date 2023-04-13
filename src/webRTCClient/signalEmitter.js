@@ -5,26 +5,49 @@ const signalEmitter = () => {
     return socket;
   };
 
-  const attachNewOneToOneCallEmitter = (socket) => {};
+  const startOneToOneCall = (callTitle, callDescription) => {
+    return new Promise((resolve, reject) => {
+      socket.emit("startOneToOneCall", {callTitle,callDescription,socketId:socket.id}, (callStatus) => {
+        console.log(callStatus)
+        if (callStatus.success) {
+          resolve(callStatus);
+        } else {
+          reject("Failed to start call");
+        }
+      });
+    });
+  };
+
+  const makeOneToOneCallJoiningRequest = (callId,candidateName) => {
+    return new Promise((resolve, reject) => {
+      socket.emit("makeOneToOneCallJoiningRequest", {callId,candidateName,socketId:socket.id}, (callStatus) => {
+        console.log(callStatus)
+        if (callStatus.success) {
+          resolve(callStatus);
+        } else {
+          reject("Failed to start call");
+        }
+      });
+    });
+  };
   
-  const attachNewGroupCallEmitter = (socket) => {};
+  const NewGroupCall = (socket) => {};
 
-  const attachJoinRequestEmitter = (socket) => {};
 
-  const attachOfferEmitter = (socket) => {};
+  const Offer = (socket) => {};
 
-  const attachAnswerEmitter = (socket) => {};
+  const Answer = (socket) => {};
 
-  const attachIceCandidatesEmitter = (socket) => {};
+  const IceCandidates = (socket) => {};
 
   return {
     init,
-    attachNewOneToOneCallEmitter,
-    attachNewGroupCallEmitter,
-    attachAnswerEmitter,
-    attachJoinRequestEmitter,
-    attachIceCandidatesEmitter,
-    attachOfferEmitter,
+    startOneToOneCall,
+    makeOneToOneCallJoiningRequest,
+    Answer,
+    
+    IceCandidates,
+    Offer,
   };
 };
 

@@ -6,8 +6,16 @@ import reportWebVitals from './reportWebVitals';
     
 import { Provider } from "react-redux";
 import store from "./redux/store/store";
+import webRTCClient from './webRTCClient/webRTCClient';
+import { setSocket, setWebRTC } from './redux/actions/actions';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
+let webRTC = webRTCClient();
+let socket = webRTC.init("http://localhost:8080");
+  
+store.dispatch(setWebRTC(webRTC));
+store.dispatch(setSocket(socket));
+
 root.render(
   <React.StrictMode>
     <Provider store={store}>

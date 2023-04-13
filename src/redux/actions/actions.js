@@ -1,4 +1,4 @@
-import { ADD_JOIN_REQUEST, ADD_PARTICIPANT, SET_CALL_DESCRIPTION, SET_CALL_ID, SET_CALL_TITLE } from "../actionTypes/actionTypes";
+import { ADD_JOIN_REQUEST, ADD_PARTICIPANT, SET_CALL_DESCRIPTION, SET_CALL_ID, SET_CALL_TITLE, SET_SOCKET, SET_SOCKET_ID, SET_WEB_RTC } from "../actionTypes/actionTypes";
 
 export const addJoinRequest = (joinRequest) => ({
     type: ADD_JOIN_REQUEST,
@@ -26,7 +26,19 @@ export const setCallId = (callId) => ({
     payload: callId
 });
 
+export const setSocketId = (socketId) => ({
+    type: SET_SOCKET_ID,
+    payload: socketId
+});
 
+export const setSocket = (socketId) => ({
+    type: SET_SOCKET,
+    payload: socketId
+});
+export const setWebRTC = (socketId) => ({
+    type: SET_WEB_RTC,
+    payload: socketId
+});
 
 
 

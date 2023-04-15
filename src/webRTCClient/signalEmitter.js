@@ -30,9 +30,10 @@ const signalEmitter = () => {
       });
     });
   };
-  const updateJoinCallRequestStatus = (requestId,status) => {
+
+  const updateJoinCallRequestStatus = (requestId,hostIceCandidates,offer,status) => {
     return new Promise((resolve, reject) => {
-      socket.emit("updateJoinCallRequestStatus", {requestId,status,socketId:socket.id}, (response) => {
+      socket.emit("updateJoinCallRequestStatus", {requestId,hostIceCandidates,offer,status,socketId:socket.id}, (response) => {
         console.log(response)
         if (response.success) {
           resolve(response);
@@ -42,12 +43,24 @@ const signalEmitter = () => {
       });
     });
   };
-  
+  const updateRemoteClientIceCandidates=(remoteSocketId,requestId,answerOffer,localIceCandidates,callId)=>{
+    return new Promise((resolve, reject) => {
+      socket.emit("updateRemoteClientIceCandidates", {remoteSocketId,requestId,answerOffer,localIceCandidates,callId,socketId:socket.id}, (response) => {
+        console.log(response)
+        if (response.success) {
+          resolve(response);
+        } else {
+          reject("Failed to update remote ice candidates");
+        }
+      });
+    });
+  }
   return {
     init,
     createCall,
     makeJoinCallRequest,
-    updateJoinCallRequestStatus
+    updateJoinCallRequestStatus,
+    updateRemoteClientIceCandidates
   };
 };
 

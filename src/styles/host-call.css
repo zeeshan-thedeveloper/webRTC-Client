@@ -50,3 +50,36 @@
    text-align: center;
    /* height:50px; */
 }
+
+.remoteVideosSection {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+  }
+  
+  .remoteVideoContainer {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    margin: 10px;
+  }
+  
+  .remoteVideo {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+  }
+  
+  .remoteVideoName {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    text-align: center;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: #fff;
+    font-size: 12px;
+    padding: 2px 0;
+  }

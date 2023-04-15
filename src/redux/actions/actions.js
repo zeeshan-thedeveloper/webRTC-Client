@@ -1,4 +1,4 @@
-import { ADD_JOIN_REQUEST, ADD_PARTICIPANT, SET_CALL_DESCRIPTION, SET_CALL_ID, SET_CALL_TITLE, SET_LOCAL_STREAM, SET_SOCKET, SET_SOCKET_ID, SET_WEB_RTC } from "../actionTypes/actionTypes";
+import { ADD_JOIN_REQUEST, ADD_PARTICIPANT, SET_CALL_DESCRIPTION, SET_CALL_ID, SET_CALL_TITLE, SET_LOCAL_NAME, SET_LOCAL_STREAM, SET_PEER_CONNECTION_MANAGER, SET_SOCKET, SET_SOCKET_ID, SET_WEB_RTC } from "../actionTypes/actionTypes";
 
 export const addJoinRequest = (joinRequest) => ({
     type: ADD_JOIN_REQUEST,
@@ -44,6 +44,18 @@ export const setLocalStream = (stream) => ({
     type: SET_LOCAL_STREAM,
     payload: stream
 });
+
+export const setPeerConnectionManager = (peerConnectionManager) => ({
+    type: SET_PEER_CONNECTION_MANAGER,
+    payload: peerConnectionManager
+});
+
+export const setLocalName = (name) => ({
+    type: SET_LOCAL_NAME,
+    payload: name
+});
+
+
 
 
 

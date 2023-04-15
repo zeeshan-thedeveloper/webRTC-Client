@@ -1,6 +1,7 @@
 import { io } from "socket.io-client";
 import signalEmitter from "./signalEmitter";
 import signalListener from "./signalListner";
+import store from "../redux/store/store";
 
 const webRTCClient = () => {
   let socket = null;
@@ -13,10 +14,10 @@ const webRTCClient = () => {
     return socket;
   };
 
-  const createCall = (callTitle, callDescription,callType) => {
+  const createCall = (callTitle, callDescription, callType) => {
     return new Promise((resolve, reject) => {
       signalEmitterHandel
-        .createCall(callTitle, callDescription,callType)
+        .createCall(callTitle, callDescription, callType)
         .then((response) => {
           // If the call was successfully started, resolve the promise
           resolve(response);
@@ -28,7 +29,7 @@ const webRTCClient = () => {
     });
   };
 
-  const joinCall = (candidateName,callId) => {
+  const joinCall = (candidateName, callId) => {
     return new Promise((resolve, reject) => {
       signalEmitterHandel
         .makeJoinCallRequest(callId, candidateName)
@@ -40,16 +41,47 @@ const webRTCClient = () => {
         });
     });
   };
- 
-  const acceptCall = (requestId) => {
+
+  const acceptCall = (request) => {
     return new Promise((resolve, reject) => {
-      signalEmitterHandel
-        .updateJoinCallRequestStatus(requestId,"admitted")
-        .then((response) => {
-          resolve(response);
+      //Now we need to created an peer connection for this request id .
+      //need to create peer connection first then adding local stream into that and then creating offer.
+      //TODO:REPLACE : DEFAULT_HOST_NAME with actual host name
+      let peerConnectionId = request.requestId;
+      let peerConnectionManager = store.getState().peerConnectionManager;
+      let localStream = store.getState().localStream;
+      peerConnectionManager
+        .createNewPeerConnection(
+          peerConnectionId,
+          "DEFAULT_HOST_NAME",
+          request.requestPayload.requesterName,
+          request.requestPayload.requesterSocketId
+        )
+        .then((peerConnection) => {
+          console.log("initialized peerConnection", peerConnection);
+          peerConnectionManager
+            .addLocalStreamIntoConnection(peerConnectionId, localStream)
+            .then((peerConnectionWithTracks) => {
+              console.log(
+                "added tracks in peerConnection",
+                peerConnectionWithTracks
+              );
+              peerConnectionManager
+                .createOffer(peerConnectionId)
+                .then((offer) => {
+                  console.log("created offer", offer);
+                  peerConnectionManager.storeOfferInConnection(
+                    offer,
+                    peerConnectionId
+                  );
+                });
+            })
+            .catch((e) => {
+              console.error(e);
+            });
         })
         .catch((e) => {
-          reject(e);
+          console.error(e);
         });
     });
   };
@@ -57,7 +89,7 @@ const webRTCClient = () => {
   const rejectCall = (requestId) => {
     return new Promise((resolve, reject) => {
       signalEmitterHandel
-        .updateJoinCallRequestStatus(requestId,"declined")
+        .updateJoinCallRequestStatus(requestId, "declined")
         .then((response) => {
           resolve(response);
         })
@@ -67,12 +99,16 @@ const webRTCClient = () => {
     });
   };
 
+  const getSignalEmitterHandel=()=>{
+    return signalEmitterHandel
+  }
   return {
     init,
     createCall,
     joinCall,
     acceptCall,
     rejectCall,
+    getSignalEmitterHandel
   };
 };
 

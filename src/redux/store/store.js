@@ -7,7 +7,9 @@ import {
   SET_CALL_DESCRIPTION,
   SET_CALL_ID,
   SET_CALL_TITLE,
+  SET_LOCAL_NAME,
   SET_LOCAL_STREAM,
+  SET_PEER_CONNECTION_MANAGER,
   SET_SOCKET,
   SET_SOCKET_ID,
   SET_WEB_RTC,
@@ -18,8 +20,10 @@ const initialState = {
   callDescription: null,
   callId: null,
   socketId: null,
+  localName: null,
   socket: null,
   webRTC: null,
+  peerConnectionManager: null,
   localStream: null,
   listOfParticipants: [],
   listOfJoinRequests: [],
@@ -77,6 +81,16 @@ const rootReducer = (state = initialState, action) => {
       return {
         ...state,
         localStream: action.payload,
+      };
+    case SET_PEER_CONNECTION_MANAGER:
+      return {
+        ...state,
+        peerConnectionManager: action.payload,
+      };
+    case SET_LOCAL_NAME:
+      return {
+        ...state,
+        localName: action.payload,
       };
 
     default:

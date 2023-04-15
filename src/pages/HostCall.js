@@ -1,10 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import "../styles/host-call.css";
-import { setLocalStream } from "../redux/actions/actions";
+import { setCallId, setLocalStream,setCallTitle } from "../redux/actions/actions";
 function HostCall() {
   //states
-  const [callTitle, setCallTitle] = useState("");
+  const [callTitle, setTitle] = useState("");
   const [callDescription, setCallDescription] = useState("");
   const [callStatus, setCallStatus] = useState("");
 
@@ -14,7 +14,8 @@ function HostCall() {
   //selectors
   const socketId = useSelector((state) => state.socketId);
   const listOfJoinRequests = useSelector((state) => state.listOfJoinRequests);
-  const localStream = useSelector((state)=>state.localStream);
+  const localStream = useSelector((state) => state.localStream);
+  const listOfParticipants = useSelector((state)=>state.listOfParticipants);
   //dispatch
   const dispatch = useDispatch();
 
@@ -28,10 +29,12 @@ function HostCall() {
       `Creating call with title: ${callTitle} and description: ${callDescription}`
     );
     webRTC
-      .createCall(callTitle, callDescription,"privateCall")
+      .createCall(callTitle, callDescription, "privateCall")
       .then((resp) => {
-        console.log(resp);
+        console.log("callStatus",resp);
         setCallStatus(resp);
+        dispatch(setCallId(resp.callId));
+        dispatch(setCallTitle(callTitle));
       })
       .catch((e) => {
         console.error(e);
@@ -40,11 +43,14 @@ function HostCall() {
 
   const handleAdmit = (request) => {
     console.log(request);
-    webRTC.acceptCall(request.requestId).then((response)=>{
-      console.log(response)
-    }).catch((e)=>{
-      console.log(e)
-    })
+    webRTC
+      .acceptCall(request)
+      .then((response) => {
+        console.log(response);
+      })
+      .catch((e) => {
+        console.log(e);
+      });
   };
   const handleDecline = (request) => {
     console.log(request);
@@ -63,12 +69,12 @@ function HostCall() {
       });
   }, []);
 
-  useEffect(()=>{
-    if(localStream!=null){
-      console.log("local stream",localStream)
-      localVideoHolderRef.current.srcObject =localStream
+  useEffect(() => {
+    if (localStream != null) {
+      console.log("local stream", localStream);
+      localVideoHolderRef.current.srcObject = localStream;
     }
-  },[localStream])
+  }, [localStream]);
 
   return (
     <div className="container">
@@ -82,7 +88,7 @@ function HostCall() {
             id="callTitle"
             name="callTitle"
             value={callTitle}
-            onChange={(e) => setCallTitle(e.target.value)}
+            onChange={(e) => setTitle(e.target.value)}
           />
           <label className="inlineLabel">Call Description</label>
           <input
@@ -135,9 +141,31 @@ function HostCall() {
       </div>
       <div className="videoSection">
         <div className="localVideoSection">
-          <video  style={{ height: "350px", width: "350px" }} ref={localVideoHolderRef} autoPlay muted />
+          <video
+            style={{ height: "350px", width: "350px" }}
+            ref={localVideoHolderRef}
+            autoPlay
+            muted
+          />
         </div>
-        <div className="remoteVideosSection"></div>
+        <div className="remoteVideosSection">
+      {listOfParticipants.map((video, index) => (
+        <div key={index} className="remoteVideoContainer">
+          <video
+            className="remoteVideo"
+            playsInline
+            autoPlay
+            muted
+            ref={(videoRef) => {
+              if (videoRef && video.remoteStream) {
+                videoRef.srcObject = video.remoteStream;
+              }
+            }}
+          />
+          <span className="remoteVideoName">{video.candidateName}</span>
+        </div>
+      ))}
+    </div>
       </div>
     </div>
   );

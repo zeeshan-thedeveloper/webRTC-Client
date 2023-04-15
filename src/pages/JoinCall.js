@@ -1,28 +1,66 @@
-import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
+import React, { useEffect, useRef, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { setCallId, setLocalName, setLocalStream } from "../redux/actions/actions";
 
 function JoinCall() {
+  //states
   const [candidateName, setCandidateName] = useState("");
-  const [callId, setCallId] = useState("");
+  const [callId, setCallID] = useState("");
   const [callStatus, setCallStatus] = useState("");
+  const localStream = useSelector((state) => state.localStream);
+  //video ref
+  const localVideoHolderRef = useRef(null);
+
+  //dispatch
+  let dispatch = useDispatch();
+
+  //selectors
   const socketId = useSelector((state) => state.socketId);
   const webRTC = useSelector((state) => state.webRTC);
 
-  const handleJoin = () => {
+  //handlers
+  const handleJoin = (event) => {
+    event.preventDefault();
     // Do something with candidateName and callId, e.g. send a POST request to a server
     console.log(
-      `Creating call with title: ${candidateName} and description: ${callId}`
+      `Joining call with title: ${candidateName} and callId: ${callId}`
     );
+
+    // dispatch(setCallId(callId))
+    // dispatch(setLocalName(candidateName));
     webRTC
       .joinCall(candidateName, callId)
       .then((resp) => {
         console.log(resp);
         setCallStatus(resp);
+        dispatch(setCallId(callId));
+        dispatch(setLocalName(candidateName));
       })
       .catch((e) => {
         console.error(e);
       });
   };
+
+  //useEffects
+
+  useEffect(() => {
+    navigator.mediaDevices
+      .getUserMedia({ video: true, audio: true })
+      .then((stream) => {
+        // set the stream in redux
+        dispatch(setLocalStream(stream));
+      })
+      .catch((error) => {
+        console.error("Error accessing media stream: ", error);
+      });
+  }, []);
+
+  useEffect(() => {
+    if (localStream != null) {
+      console.log("local stream", localStream);
+      localVideoHolderRef.current.srcObject = localStream;
+    }
+  }, [localStream]);
 
   return (
     <div className="container">
@@ -45,19 +83,31 @@ function JoinCall() {
             id="callId"
             name="callId"
             value={callId}
-            onChange={(e) => setCallId(e.target.value)}
+            onChange={(e) => setCallID(e.target.value)}
           />
           <button className="inlineButton" onClick={handleJoin}>
             Join Call
           </button>
         </div>
       </div>
+
       <div className="callInfoContainer">
         <h4>Socket Id : {socketId}</h4>
         <h4>Call Id : {callStatus.requestId}</h4>
         <h4>Call Status : {callStatus.message}</h4>
       </div>
-      
+
+      <div className="videoSection">
+        <div className="localVideoSection">
+          <video
+            style={{ height: "350px", width: "350px" }}
+            ref={localVideoHolderRef}
+            autoPlay
+            muted
+          />
+        </div>
+        <div className="remoteVideosSection"></div>
+      </div>
     </div>
   );
 }

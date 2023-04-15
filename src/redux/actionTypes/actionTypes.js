@@ -7,6 +7,9 @@ export const SET_SOCKET_ID = "SET_SOCKET_ID";
 export const SET_SOCKET = "SET_SOCKET";
 export const SET_WEB_RTC = "SET_WEB_RTC";
 export const SET_LOCAL_STREAM = "SET_LOCAL_STREAM";
+export const SET_PEER_CONNECTION_MANAGER = "SET_PEER_CONNECTION_MANAGER";
+export const SET_LOCAL_NAME = "SET_LOCAL_NAME";
+
 
 
 

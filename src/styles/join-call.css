@@ -35,3 +35,15 @@
     margin-left: 5%;
 
 }
+
+
+.videoSection{
+    width: 90%;
+    margin-left: 5%;
+    margin-right: 5%;
+}
+
+.localVideoSection{
+   text-align: center;
+   /* height:50px; */
+}

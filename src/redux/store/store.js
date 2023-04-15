@@ -7,6 +7,7 @@ import {
   SET_CALL_DESCRIPTION,
   SET_CALL_ID,
   SET_CALL_TITLE,
+  SET_LOCAL_STREAM,
   SET_SOCKET,
   SET_SOCKET_ID,
   SET_WEB_RTC,
@@ -19,6 +20,7 @@ const initialState = {
   socketId: null,
   socket: null,
   webRTC: null,
+  localStream: null,
   listOfParticipants: [],
   listOfJoinRequests: [],
 };
@@ -70,6 +72,11 @@ const rootReducer = (state = initialState, action) => {
       return {
         ...state,
         webRTC: action.payload,
+      };
+    case SET_LOCAL_STREAM:
+      return {
+        ...state,
+        localStream: action.payload,
       };
 
     default:

@@ -6,6 +6,8 @@ export const SET_CALL_ID = "SET_CALL_ID";
 export const SET_SOCKET_ID = "SET_SOCKET_ID";
 export const SET_SOCKET = "SET_SOCKET";
 export const SET_WEB_RTC = "SET_WEB_RTC";
+export const SET_LOCAL_STREAM = "SET_LOCAL_STREAM";
+
 
 
 

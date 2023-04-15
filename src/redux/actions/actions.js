@@ -1,4 +1,4 @@
-import { ADD_JOIN_REQUEST, ADD_PARTICIPANT, SET_CALL_DESCRIPTION, SET_CALL_ID, SET_CALL_TITLE, SET_SOCKET, SET_SOCKET_ID, SET_WEB_RTC } from "../actionTypes/actionTypes";
+import { ADD_JOIN_REQUEST, ADD_PARTICIPANT, SET_CALL_DESCRIPTION, SET_CALL_ID, SET_CALL_TITLE, SET_LOCAL_STREAM, SET_SOCKET, SET_SOCKET_ID, SET_WEB_RTC } from "../actionTypes/actionTypes";
 
 export const addJoinRequest = (joinRequest) => ({
     type: ADD_JOIN_REQUEST,
@@ -40,6 +40,10 @@ export const setWebRTC = (socketId) => ({
     payload: socketId
 });
 
+export const setLocalStream = (stream) => ({
+    type: SET_LOCAL_STREAM,
+    payload: stream
+});
 
 
 

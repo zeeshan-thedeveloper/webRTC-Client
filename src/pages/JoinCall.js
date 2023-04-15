@@ -14,7 +14,7 @@ function JoinCall() {
       `Creating call with title: ${candidateName} and description: ${callId}`
     );
     webRTC
-      .joinOneToOneCall(candidateName, callId)
+      .joinCall(candidateName, callId)
       .then((resp) => {
         console.log(resp);
         setCallStatus(resp);

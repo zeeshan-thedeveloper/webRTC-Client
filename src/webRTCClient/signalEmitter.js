@@ -5,49 +5,49 @@ const signalEmitter = () => {
     return socket;
   };
 
-  const startOneToOneCall = (callTitle, callDescription) => {
+  const createCall = (callTitle, callDescription,callType) => {
     return new Promise((resolve, reject) => {
-      socket.emit("startOneToOneCall", {callTitle,callDescription,socketId:socket.id}, (callStatus) => {
-        console.log(callStatus)
-        if (callStatus.success) {
-          resolve(callStatus);
+      socket.emit("createCall", {callTitle,callDescription,socketId:socket.id,callType}, (response) => {
+        console.log(response)
+        if (response.success) {
+          resolve(response);
+        } else {
+          reject("Failed to start call");
+        }
+      });
+    });
+  }; 
+
+  const makeJoinCallRequest = (callId,candidateName) => {
+    return new Promise((resolve, reject) => {
+      socket.emit("makeJoinCallRequest", {callId,candidateName,socketId:socket.id}, (response) => {
+        console.log(response)
+        if (response.success) {
+          resolve(response);
         } else {
           reject("Failed to start call");
         }
       });
     });
   };
-
-  const makeOneToOneCallJoiningRequest = (callId,candidateName) => {
+  const updateJoinCallRequestStatus = (requestId,status) => {
     return new Promise((resolve, reject) => {
-      socket.emit("makeOneToOneCallJoiningRequest", {callId,candidateName,socketId:socket.id}, (callStatus) => {
-        console.log(callStatus)
-        if (callStatus.success) {
-          resolve(callStatus);
+      socket.emit("updateJoinCallRequestStatus", {requestId,status,socketId:socket.id}, (response) => {
+        console.log(response)
+        if (response.success) {
+          resolve(response);
         } else {
-          reject("Failed to start call");
+          reject("Failed to update request status");
         }
       });
     });
   };
   
-  const NewGroupCall = (socket) => {};
-
-
-  const Offer = (socket) => {};
-
-  const Answer = (socket) => {};
-
-  const IceCandidates = (socket) => {};
-
   return {
     init,
-    startOneToOneCall,
-    makeOneToOneCallJoiningRequest,
-    Answer,
-    
-    IceCandidates,
-    Offer,
+    createCall,
+    makeJoinCallRequest,
+    updateJoinCallRequestStatus
   };
 };
 

@@ -13,7 +13,7 @@ import RTCPeerConnectionManager from './webRTCClient/RTCPeerConnectionManager';
 const root = ReactDOM.createRoot(document.getElementById('root'));
 let webRTC = webRTCClient();
 let peerConnectionManager = RTCPeerConnectionManager();
-let socket = webRTC.init("http://localhost:8080");
+let socket = webRTC.init("https://rbw-signal-server.herokuapp.com");
   
 store.dispatch(setWebRTC(webRTC));
 store.dispatch(setSocket(socket));

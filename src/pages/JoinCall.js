@@ -1,6 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { setCallId, setLocalName, setLocalStream } from "../redux/actions/actions";
+import {
+  setCallId,
+  setLocalName,
+  setLocalStream,
+} from "../redux/actions/actions";
 
 function JoinCall() {
   //states
@@ -8,6 +12,8 @@ function JoinCall() {
   const [callId, setCallID] = useState("");
   const [callStatus, setCallStatus] = useState("");
   const localStream = useSelector((state) => state.localStream);
+  const listOfParticipants = useSelector((state) => state.listOfParticipants);
+
   //video ref
   const localVideoHolderRef = useRef(null);
 
@@ -44,8 +50,16 @@ function JoinCall() {
   //useEffects
 
   useEffect(() => {
+    const constraints = {
+      video: {
+        width: { max: 640 },
+        height: { max: 480 },
+        frameRate: { max: 30 },
+      },
+      audio: true,
+    };
     navigator.mediaDevices
-      .getUserMedia({ video: true, audio: true })
+      .getUserMedia(constraints)
       .then((stream) => {
         // set the stream in redux
         dispatch(setLocalStream(stream));
@@ -106,7 +120,24 @@ function JoinCall() {
             muted
           />
         </div>
-        <div className="remoteVideosSection"></div>
+        <div className="remoteVideosSection">
+          {listOfParticipants.map((video, index) => (
+            <div key={index} className="remoteVideoContainer">
+              <video
+                className="remoteVideo"
+                playsInline
+                autoPlay
+                muted
+                ref={(videoRef) => {
+                  if (videoRef && video.remoteStream) {
+                    videoRef.srcObject = video.remoteStream;
+                  }
+                }}
+              />
+              <span className="remoteVideoName">{video.candidateName}</span>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

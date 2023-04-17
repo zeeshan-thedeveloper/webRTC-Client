@@ -58,8 +58,16 @@ function HostCall() {
 
   //useEffects
   useEffect(() => {
+    const constraints = {
+      video: {
+        width: { max: 640 },
+        height: { max: 480 },
+        frameRate: { max: 30 },
+      },
+      audio: true,
+    };
     navigator.mediaDevices
-      .getUserMedia({ video: true, audio: true })
+      .getUserMedia(constraints)
       .then((stream) => {
         // set the stream in redux
         dispatch(setLocalStream(stream));

@@ -34,8 +34,8 @@ const RTCPeerConnectionManager = () => {
         remoteIceCandidates: [],
         localIceCandidates: [],
         offer: null,
-        remoteOffer: null,
         answer: null,
+        autoAccept: false,
         listeners: {
           onicecandidate: (event) => {
             console.log(`onicecandidate event for connection ${connectionId}`);
@@ -63,48 +63,85 @@ const RTCPeerConnectionManager = () => {
               const remoteSocketId =
                 peerConnections[connectionId].remoteSocketId;
               const callId = peerConnections[connectionId].callId;
+              const autoAccept = peerConnections[connectionId].autoAccept;
+              const localName = store.getState().localName
               let webRTC = store.getState().webRTC;
 
               if (localIceCandidates.length > 0) {
-                //TODO:NEED TO EMIT EVENT TO UPDATE ICE CANDIDATES FOR GIVEN CLIENT SOCKET ID
-
                 //We need to check first if remote host ice candidates are stored or not? if yes then we need to emit updateRemoteClientIceCandidates
                 if (remoteIceCandidates.length == 0) {
                   console.log(
                     `Sending request accepted request to signal server for request id : ${connectionId}`
                   );
-                  webRTC
-                    .getSignalEmitterHandel()
-                    .updateJoinCallRequestStatus(
-                      connectionId,
-                      localIceCandidates,
-                      offer,
-                      "admitted"
-                    )
-                    .then((response) => {
-                      console.log(response);
-                    })
-                    .catch((e) => {
-                      console.error(e);
-                    });
+                  if (!autoAccept) {
+                    webRTC
+                      .getSignalEmitterHandel()
+                      .updateJoinCallRequestStatus(
+                        connectionId,
+                        localIceCandidates,
+                        offer,
+                        "admitted"
+                      )
+                      .then((response) => {
+                        console.log(response);
+                      })
+                      .catch((e) => {
+                        console.error(e);
+                      });
+                  } else {
+                    //auto accept
+                    console.log("remoteSocketId-auto-accept",remoteSocketId)
+                    webRTC
+                      .getSignalEmitterHandel()
+                      .sendAutoAcceptOffer(
+                        connectionId,localIceCandidates,offer,remoteSocketId,callId,localName
+                      )
+                      .then((response) => {
+                        console.log(response);
+                      })
+                      .catch((e) => {
+                        console.error(e);
+                      });
+                  }
                 } else {
+                  //this will be triggered when answer offer is created
                   //emit : updateRemoteClientIceCandidates
                   console.log("updateRemoteClientIceCandidates");
-                  webRTC
-                    .getSignalEmitterHandel()
-                    .updateRemoteClientIceCandidates(
-                      remoteSocketId,
-                      connectionId,
-                      answerOffer,
-                      localIceCandidates,
-                      callId
-                    )
-                    .then((response) => {
-                      console.log(response)
-                    })
-                    .catch((e) => {
-                      console.log(e);
-                    });
+                  if (!autoAccept) {
+                    webRTC
+                      .getSignalEmitterHandel()
+                      .updateRemoteClientIceCandidates(
+                        remoteSocketId,
+                        connectionId,
+                        answerOffer,
+                        localIceCandidates,
+                        callId
+                      )
+                      .then((response) => {
+                        console.log(response);
+                      })
+                      .catch((e) => {
+                        console.log(e);
+                      });
+                  } else {
+                    //auto accept : update updateRemoteClientIceCandidates - this will be triggered when answer will be created
+                    webRTC
+                      .getSignalEmitterHandel()
+                      .updateAutoRemoteClientIceCandidates(
+                        remoteSocketId,
+                        connectionId,
+                        answerOffer,
+                        localIceCandidates,
+                        callId,
+                        localName
+                      )
+                      .then((response) => {
+                        console.log(response);
+                      })
+                      .catch((e) => {
+                        console.log(e);
+                      });
+                  }
                 }
               } else {
                 // emitting event to accept join request.
@@ -144,7 +181,6 @@ const RTCPeerConnectionManager = () => {
     });
   };
 
-  
   const addLocalStreamIntoConnection = (connectionId, localStream) => {
     return new Promise((resolve, reject) => {
       let connection = peerConnections[connectionId].connection;
@@ -228,33 +264,13 @@ const RTCPeerConnectionManager = () => {
       peerConnections[connectionId].remoteIceCandidates
     );
   };
-
-  // const updateRemoteIceCandidates = async (connectionId) => {
-  //   try {
-  //     const connection = peerConnections[connectionId].connection;
-  //     if (!connection) {
-  //       throw new Error(`Connection with ID ${connectionId} not found`);
-  //     }
-  //     if (!peerConnections[connectionId].remoteIceCandidates) {
-  //       throw new Error(
-  //         `No remote ICE candidates found for connection ${connectionId}`
-  //       );
-  //     }
-  //     for (const candidateObj of peerConnections[connectionId]
-  //       .remoteIceCandidates) {
-  //       const candidate = new RTCIceCandidate(candidateObj);
-  //       await connection.addIceCandidate(candidate);
-  //       console.log(
-  //         `ICE candidate added successfully for connection ${connectionId}`
-  //       );
-  //     }
-  //   } catch (error) {
-  //     console.error(
-  //       `Error adding ICE candidate for connection ${connectionId}:`,
-  //       error
-  //     );
-  //   }
-  // };
+  const updateAutoAcceptFlag = (state, connectionId) => {
+    peerConnections[connectionId].autoAccept = state;
+    console.log(
+      " peerConnections[connectionId].autoAccept",
+      peerConnections[connectionId].autoAccept
+    );
+  };
 
   const updateRemoteIceCandidates = (connectionId) => {
     return new Promise((resolve, reject) => {
@@ -298,7 +314,9 @@ const RTCPeerConnectionManager = () => {
   const storeLocalIceCandidates = (iceCandidates, connectionId) => {
     peerConnections[connectionId].localIceCandidates = iceCandidates;
   };
-
+  const storeAnswerOffer = (answerOffer, connectionId) => {
+    peerConnections[connectionId].answer = answerOffer;
+  };
   const setRemoteDescription = (connectionId, remoteOffer) => {
     const desc = new RTCSessionDescription(remoteOffer);
 
@@ -306,7 +324,10 @@ const RTCPeerConnectionManager = () => {
       peerConnections[connectionId].connection
         .setRemoteDescription(desc)
         .then(() => {
-          console.log("Remote description set successfully for connection : ",connectionId);
+          console.log(
+            "Remote description set successfully for connection : ",
+            connectionId
+          );
           resolve();
         })
         .catch((error) => {
@@ -333,6 +354,9 @@ const RTCPeerConnectionManager = () => {
     return peerConnections[connectionId];
   };
 
+  const getAllPeerConnections = () => {
+    return peerConnections;
+  };
   return {
     init,
     addLocalStreamIntoConnection,
@@ -347,6 +371,9 @@ const RTCPeerConnectionManager = () => {
     storeOfferInConnection,
     storeRemoteOfferInConnection,
     getPeerConnectionByConnectionId,
+    getAllPeerConnections,
+    storeAnswerOffer,
+    updateAutoAcceptFlag,
   };
 };
 

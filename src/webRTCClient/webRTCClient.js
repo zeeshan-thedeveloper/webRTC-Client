@@ -43,46 +43,54 @@ const webRTCClient = () => {
   };
 
   const acceptCall = (request) => {
-    return new Promise((resolve, reject) => {
+    return new Promise(async(resolve, reject) => {
       //Now we need to created an peer connection for this request id .
       //need to create peer connection first then adding local stream into that and then creating offer.
       //TODO:REPLACE : DEFAULT_HOST_NAME with actual host name
       let peerConnectionId = request.requestId;
       let peerConnectionManager = store.getState().peerConnectionManager;
+      
       let localStream = store.getState().localStream;
+      //Lets try generating new local stream
+      localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+      
       peerConnectionManager
-        .createNewPeerConnection(
-          peerConnectionId,
-          "DEFAULT_HOST_NAME",
-          request.requestPayload.requesterName,
-          request.requestPayload.requesterSocketId
-        )
-        .then((peerConnection) => {
-          console.log("initialized peerConnection", peerConnection);
-          peerConnectionManager
-            .addLocalStreamIntoConnection(peerConnectionId, localStream)
-            .then((peerConnectionWithTracks) => {
-              console.log(
-                "added tracks in peerConnection",
-                peerConnectionWithTracks
-              );
+            .createNewPeerConnection(
+              peerConnectionId,
+              "DEFAULT_HOST_NAME",
+              request.requestPayload.requesterName,
+              request.requestPayload.requesterSocketId
+            )
+            .then((peerConnection) => {
+              console.log("initialized peerConnection", peerConnection);
               peerConnectionManager
-                .createOffer(peerConnectionId)
-                .then((offer) => {
-                  console.log("created offer", offer);
-                  peerConnectionManager.storeOfferInConnection(
-                    offer,
-                    peerConnectionId
+                .addLocalStreamIntoConnection(peerConnectionId, localStream)
+                .then((peerConnectionWithTracks) => {
+                  console.log(
+                    "added tracks in peerConnection",
+                    peerConnectionWithTracks
                   );
+                  peerConnectionManager
+                    .createOffer(peerConnectionId)
+                    .then((offer) => {
+                      console.log("created offer", offer);
+                      console.log(
+                        "getAllPeerConnections",
+                        peerConnectionManager.getAllPeerConnections()
+                      );
+                      peerConnectionManager.storeOfferInConnection(
+                        offer,
+                        peerConnectionId
+                      );
+                    });
+                })
+                .catch((e) => {
+                  console.error(e);
                 });
             })
             .catch((e) => {
               console.error(e);
             });
-        })
-        .catch((e) => {
-          console.error(e);
-        });
     });
   };
 
@@ -99,16 +107,16 @@ const webRTCClient = () => {
     });
   };
 
-  const getSignalEmitterHandel=()=>{
-    return signalEmitterHandel
-  }
+  const getSignalEmitterHandel = () => {
+    return signalEmitterHandel;
+  };
   return {
     init,
     createCall,
     joinCall,
     acceptCall,
     rejectCall,
-    getSignalEmitterHandel
+    getSignalEmitterHandel,
   };
 };
 

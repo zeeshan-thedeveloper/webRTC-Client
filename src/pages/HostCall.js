@@ -153,7 +153,7 @@ function HostCall() {
             style={{ height: "350px", width: "350px" }}
             ref={localVideoHolderRef}
             autoPlay
-            
+            muted
           />
         </div>
         <div className="remoteVideosSection">

@@ -127,7 +127,7 @@ function JoinCall() {
                 className="remoteVideo"
                 playsInline
                 autoPlay
-                muted
+                
                 ref={(videoRef) => {
                   if (videoRef && video.remoteStream) {
                     videoRef.srcObject = video.remoteStream;

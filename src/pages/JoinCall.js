@@ -117,7 +117,7 @@ function JoinCall() {
             style={{ height: "350px", width: "350px" }}
             ref={localVideoHolderRef}
             autoPlay
-            muted
+            
           />
         </div>
         <div className="remoteVideosSection">
@@ -127,7 +127,7 @@ function JoinCall() {
                 className="remoteVideo"
                 playsInline
                 autoPlay
-                muted
+                
                 ref={(videoRef) => {
                   if (videoRef && video.remoteStream) {
                     videoRef.srcObject = video.remoteStream;

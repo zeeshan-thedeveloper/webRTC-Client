@@ -19,7 +19,14 @@ const RTCPeerConnectionManager = () => {
       let callId = store.getState().callId;
       let localStream = store.getState().localStream;
 
-      const peerConnection = new RTCPeerConnection();
+      const iceConfiguration = {
+        iceServers: [
+          {
+            urls: 'stun:stun.l.google.com:19302',
+          },
+        ],
+      };
+      const peerConnection = new RTCPeerConnection(iceConfiguration);
 
       // Store the RTCPeerConnection object in the peerConnections object
       peerConnections[connectionId] = {

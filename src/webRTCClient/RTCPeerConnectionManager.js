@@ -19,14 +19,19 @@ const RTCPeerConnectionManager = () => {
       let callId = store.getState().callId;
       let localStream = store.getState().localStream;
 
-      const iceConfiguration = {
+      let configuration = {
         iceServers: [
           {
-            urls: 'stun:stun.l.google.com:19302',
+            urls: "stun:stun.privateweb7.cloud:3478",
+          },
+          {
+            urls: "turn:turn.privateweb7.cloud:3478?transport=udp",
+            username: "myUsername",
+            credential: "myPassword",
           },
         ],
       };
-      const peerConnection = new RTCPeerConnection(iceConfiguration);
+      const peerConnection = new RTCPeerConnection(configuration);
 
       // Store the RTCPeerConnection object in the peerConnections object
       peerConnections[connectionId] = {
@@ -71,7 +76,7 @@ const RTCPeerConnectionManager = () => {
                 peerConnections[connectionId].remoteSocketId;
               const callId = peerConnections[connectionId].callId;
               const autoAccept = peerConnections[connectionId].autoAccept;
-              const localName = store.getState().localName
+              const localName = store.getState().localName;
               let webRTC = store.getState().webRTC;
 
               if (localIceCandidates.length > 0) {
@@ -97,11 +102,16 @@ const RTCPeerConnectionManager = () => {
                       });
                   } else {
                     //auto accept
-                    console.log("remoteSocketId-auto-accept",remoteSocketId)
+                    console.log("remoteSocketId-auto-accept", remoteSocketId);
                     webRTC
                       .getSignalEmitterHandel()
                       .sendAutoAcceptOffer(
-                        connectionId,localIceCandidates,offer,remoteSocketId,callId,localName
+                        connectionId,
+                        localIceCandidates,
+                        offer,
+                        remoteSocketId,
+                        callId,
+                        localName
                       )
                       .then((response) => {
                         console.log(response);

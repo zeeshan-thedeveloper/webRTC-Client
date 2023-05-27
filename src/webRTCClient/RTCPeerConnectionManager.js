@@ -20,10 +20,8 @@ const RTCPeerConnectionManager = () => {
       let localStream = store.getState().localStream;
 
       let configuration = {
+        iceTransportPolicy: "relay", // relay is another name for a TURN server
         iceServers: [
-          {
-            urls: "stun:stun.privateweb7.cloud:3478",
-          },
           {
             urls: "turn:turn.privateweb7.cloud:3478?transport=udp",
             username: "zeeshan",

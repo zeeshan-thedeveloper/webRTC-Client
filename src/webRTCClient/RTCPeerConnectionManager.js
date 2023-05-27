@@ -26,8 +26,8 @@ const RTCPeerConnectionManager = () => {
           },
           {
             urls: "turn:turn.privateweb7.cloud:3478?transport=udp",
-            username: "myUsername",
-            credential: "myPassword",
+            username: "zeeshan",
+            credential: "12345",
           },
         ],
       };
